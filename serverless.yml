@@ -1,5 +1,7 @@
 service: twilio-lambda-functions
 frameworkVersion: ">=1.1.0 <2.0.0"
+plugins:
+  - serverless-dotenv-plugin
 provider:
   name: aws
   runtime: nodejs12.x
@@ -8,11 +10,8 @@ provider:
   memorySize: 256
   timeout: 10
   environment:
-    # Replace these environment variables with your Twilio and Google values
-    TWILIO_ACCOUNT_SID: AC81ea16ec867a1fd9a781b51a20d8f7c6
-    TWILIO_AUTH_TOKEN: 4ee58b3faa8b0c267f20d51cbf809a83
-    TWILIO_PHONE_NUMBER: +13143103033
-
+    twilioAccountSid: ${env:TWILIO_ACCOUNT_SID}
+    twilioAuthToken: ${env:TWILIO_AUTH_TOKEN}
 
 functions:
   SendSms:

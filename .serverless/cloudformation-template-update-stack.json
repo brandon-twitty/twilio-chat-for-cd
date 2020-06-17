@@ -24,7 +24,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/twilio-lambda-functions/dev/1591997042715-2020-06-12T21:24:02.715Z/twilio-lambda-functions.zip"
+          "S3Key": "serverless/twilio-lambda-functions/dev/1592338019582-2020-06-16T20:06:59.582Z/twilio-lambda-functions.zip"
         },
         "FunctionName": "twilio-lambda-functions-dev-SendSms",
         "Handler": "handler.sendSms",
@@ -34,9 +34,10 @@
         "Timeout": 10,
         "Environment": {
           "Variables": {
+            "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
+            "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
             "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-            "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83",
-            "TWILIO_PHONE_NUMBER": 13143103033
+            "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83"
           }
         }
       },
@@ -44,14 +45,14 @@
         "SendSmsLogGroup"
       ]
     },
-    "SendSmsLambdaVersionBWdQxRagd0t8HjSuxNnlczoHhgOiYkzKcml8Unw": {
+    "SendSmsLambdaVersionGwalfSuj7HUdwO5UWZFzaAA8g7p9g9I7Ty11uhbuuE": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "SendSmsLambdaFunction"
         },
-        "CodeSha256": "h8WjocP/yPDRSVTpXxyb2vFaAV0mTGLFaw+Og6Rm1p4="
+        "CodeSha256": "YJYs1yHVewDnvob0WtNCajr1PLPfXGKstozdq/dxYaw="
       }
     },
     "ReceiveSmsLambdaFunction": {
@@ -61,7 +62,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/twilio-lambda-functions/dev/1591997042715-2020-06-12T21:24:02.715Z/twilio-lambda-functions.zip"
+          "S3Key": "serverless/twilio-lambda-functions/dev/1592338019582-2020-06-16T20:06:59.582Z/twilio-lambda-functions.zip"
         },
         "FunctionName": "twilio-lambda-functions-dev-ReceiveSms",
         "Handler": "rec_webhook.receiveSms",
@@ -71,9 +72,10 @@
         "Timeout": 10,
         "Environment": {
           "Variables": {
+            "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
+            "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
             "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-            "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83",
-            "TWILIO_PHONE_NUMBER": 13143103033
+            "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83"
           }
         }
       },
@@ -81,14 +83,14 @@
         "ReceiveSmsLogGroup"
       ]
     },
-    "ReceiveSmsLambdaVersionpB78GcyCdKavaj3YSjHo9ayJCpNJWCNkCl38SemZec": {
+    "ReceiveSmsLambdaVersionje1gPZ5WzczIRltFyu2TTwKjgSfpmbnkEirekP2oSs": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "ReceiveSmsLambdaFunction"
         },
-        "CodeSha256": "h8WjocP/yPDRSVTpXxyb2vFaAV0mTGLFaw+Og6Rm1p4="
+        "CodeSha256": "YJYs1yHVewDnvob0WtNCajr1PLPfXGKstozdq/dxYaw="
       }
     },
     "ApiGatewayRestApi": {
@@ -605,7 +607,7 @@
         ]
       }
     },
-    "ApiGatewayDeployment1591997042857": {
+    "ApiGatewayDeployment1592338019734": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -722,13 +724,13 @@
     "SendSmsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "SendSmsLambdaVersionBWdQxRagd0t8HjSuxNnlczoHhgOiYkzKcml8Unw"
+        "Ref": "SendSmsLambdaVersionGwalfSuj7HUdwO5UWZFzaAA8g7p9g9I7Ty11uhbuuE"
       }
     },
     "ReceiveSmsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "ReceiveSmsLambdaVersionpB78GcyCdKavaj3YSjHo9ayJCpNJWCNkCl38SemZec"
+        "Ref": "ReceiveSmsLambdaVersionje1gPZ5WzczIRltFyu2TTwKjgSfpmbnkEirekP2oSs"
       }
     },
     "ServiceEndpoint": {
