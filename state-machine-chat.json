@@ -1,0 +1,59 @@
+{
+  "Comment": "A messaging work flow for masked messages",
+  "StartAt": "Initialize Conversation",
+  "States": {
+    "Initialize Conversation": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:InitializeConversation",
+      "Next": "Save Light User"
+    },
+    "Save Light User": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:light-user-service-dev-createLightUser",
+      "Next": "Mask Numbers"
+    },
+    "Mask Numbers": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-maskNumbers",
+      "Next": "Handle Conversation"
+    },
+    "Handle Conversation": {
+      "Type" : "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Status",
+          "NumericEquals": 1,
+          "Next": "Send Message"
+        },
+        {
+          "Variable": "$.Status",
+          "NumericEquals": 0,
+          "Next": "Return Message To Sender"
+        }
+      ]
+    },
+    "Send Message": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-SendSms",
+      "Next": "Count Messages"
+    },
+    "Count Message": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-countMessages",
+      "Next": "Update Users"
+    },
+    "Update Users": {
+      "Type": "Succeed",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-updateUsers",
+      "end": true
+    },
+    "Return Message To Sender": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME",
+      "Next": "Fail"
+    },
+    "Fail": {
+      "Type": "Fail",
+      "Cause": "log reason to s3 bucket - out off messages - person blocked you etc etc"    }
+  }
+}

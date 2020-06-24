@@ -10,14 +10,15 @@ const headers = {'Access-Control-Allow-Origin': '*'};
 
 module.exports.sendSms = (event, context, callback) => {
     const sms = {
-        body: 'Hello from Lambda!',
-        to: '+13145995164',  // your phone number
-        from: '+13143103033' // a valid Twilio number
-        /*to: event.body.to,
+        /*body: 'just admit u like thr Pen15 breath',
+        to: '+13142105269',  // your phone number
+        from: '+13143103033' // a valid Twilio number*/
+        to: event.body.to,
         body: event.body.message || '',
-        from: twilioPhoneNumber,*/
+        from: event.body.from
     };
-    twilioClient.messages.create(sms, (error, data) => {
+}
+    /*twilioClient.messages.create(sms, (error, data) => {
         if (error) {
 
             const twilioErrResponse = {
@@ -47,4 +48,4 @@ module.exports.sendSms = (event, context, callback) => {
 
         callback(null, successResponse);
     }).then(message => console.log(message.sid))
-};
+};*/
