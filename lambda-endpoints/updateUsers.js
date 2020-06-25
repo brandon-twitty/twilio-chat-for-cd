@@ -12,5 +12,4 @@ module.exports.handler = async ( event, context, callback) => {
 
     //update users with message counts and add new conversations if it is new conversation
 
-
 };

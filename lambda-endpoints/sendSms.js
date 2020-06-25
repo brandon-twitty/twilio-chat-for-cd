@@ -12,7 +12,7 @@ module.exports.handler = async ( event, context, callback) => {
     const sms = {
         to: event.body.userProfilePhone,
         from: event.body.lightUsersPhoneNumber,
-        body: event.body.lightUsersName + 'Has received one of your card date card and wises to speak to you' + event.body.initialMessage,
+        body: event.body.lightUsersName + 'Has received one of your card date card and wishes to speak to you' + event.body.initialMessage,
     };
 
     twilioClient.messages.create(sms, (error, data) => {

@@ -1,12 +1,11 @@
 'use strict';
 const Responses = require('../common/API_Response');
 const Dynamo = require('../common/Dynamo');
-    const AWS = require('aws-sdk');
-    const uuid = require ("uuid");
-
-    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
-    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-    const twilioClient = require('twilio')(twilioAccountSid, twilioAuthToken);
+const AWS = require('aws-sdk');
+const uuid = require ("uuid");
+const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioClient = require('twilio')(twilioAccountSid, twilioAuthToken);
  // request incoming from webhook
 // const request = require('request');
 // Required in responses for CORS support to work

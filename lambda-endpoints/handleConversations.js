@@ -11,15 +11,13 @@ module.exports.handler = async ( event, context, callback) => {
 
     // validations
 
-//user updates that are needed
-
-// counts messages
+// do they have enough purchased messages
 
 // sends to receiver if everything is ok
 
 // replies back to sender if not
 
-//logs success or fails to carddate system
+//logs success or fails to carddate system (s3 bucket possibly)
 
 }
 ;

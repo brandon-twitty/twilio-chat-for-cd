@@ -84,6 +84,14 @@ functions:
           method: put
           integration: lambda
           cors: true
+  returnFailMessage:
+    handler: lambda-endpoints/returnFailMessage.handler
+    events:
+      - http:
+          path: update-user
+          method: put
+          integration: lambda
+          cors: true
 
 resources:
   Resources:

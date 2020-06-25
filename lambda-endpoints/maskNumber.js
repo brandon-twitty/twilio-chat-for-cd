@@ -22,7 +22,7 @@ module.exports.handler = async ( event, context, callback) => {
                 console.log('stringed twilio numbers',maskedUsersNumbers)
             }
         });
-
+// update conversation database with the proxy phone numbers that belong to the conversation
 
 };
 

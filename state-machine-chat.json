@@ -17,6 +17,11 @@
       "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-maskNumbers",
       "Next": "Handle Conversation"
     },
+    "Count Message": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-countMessages",
+      "Next": "Update Users"
+    },
     "Handle Conversation": {
       "Type" : "Choice",
       "Choices": [
@@ -36,11 +41,6 @@
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-SendSms",
       "Next": "Count Messages"
-    },
-    "Count Message": {
-      "Type": "Task",
-      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-countMessages",
-      "Next": "Update Users"
     },
     "Update Users": {
       "Type": "Succeed",
