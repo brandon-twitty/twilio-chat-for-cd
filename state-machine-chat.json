@@ -4,7 +4,7 @@
   "States": {
     "Initialize Conversation": {
       "Type": "Task",
-      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:InitializeConversation",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-initializeConversation",
       "Next": "Save Light User"
     },
     "Save Light User": {
@@ -15,12 +15,12 @@
     "Mask Numbers": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-maskNumbers",
-      "Next": "Handle Conversation"
+      "Next": "Count Message"
     },
     "Count Message": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-countMessages",
-      "Next": "Update Users"
+      "Next": "Handle Conversation"
     },
     "Handle Conversation": {
       "Type" : "Choice",
@@ -40,16 +40,16 @@
     "Send Message": {
       "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-SendSms",
-      "Next": "Count Messages"
+      "Next": "Update Users"
     },
     "Update Users": {
-      "Type": "Succeed",
+      "Type": "Task",
       "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-updateUsers",
-      "end": true
+      "End": true
     },
     "Return Message To Sender": {
       "Type": "Task",
-      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:FUNCTION_NAME",
+      "Resource": "arn:aws:lambda:us-east-2:972126823319:function:twilio-lambda-functions-dev-returnFailMessage",
       "Next": "Fail"
     },
     "Fail": {
