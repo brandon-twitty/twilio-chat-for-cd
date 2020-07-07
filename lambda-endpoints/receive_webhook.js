@@ -1,86 +1,86 @@
 'use strict';
 const Responses = require('../common/API_Response');
-const Dynamo = require('../common/Dynamo');
+const DynamoDB = require('../common/DynamoDB');
+const ConversationState = require('../common/ConversationState');
 const AWS = require('aws-sdk');
 const uuid = require ("uuid");
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
 const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = require('twilio')(twilioAccountSid, twilioAuthToken);
- // request incoming from webhook
-// const request = require('request');
-// Required in responses for CORS support to work
-const headers = {'Access-Control-Allow-Origin': '*'};
-const http = require('serverless-http');
-const MessagingResponse = require('twilio').twiml.MessagingResponse;
+const { _200, _400 } = require('../common/API_Response');
 
-var lambda = new AWS.Lambda();
-const documentClient = new AWS.DynamoDB.DocumentClient();
+async function getConversationAndSendMessage(conversations, originPhone, isUser, messageContent)
+{
+	const conversation = conversations.filter(c => originPhone == (isUser ? c.user_phone : c.light_phone))[0];
+	if (conversation == null)
+		return _400('No such conversation exists');
 
-module.exports.receiveSms = async (event, context, callback) => {
-    let phoneNumber = event.body.to;
-    let message = `Incoming message from ${event.body.From}: ${event.body.Body}: ${event.body.to}`;
-    console.log(`Incoming message from ${event.body.From}: ${event.body.Body}`);
-    const twiml = new MessagingResponse();
-    twiml.message(message);
+	if (conversation.states.includes(ConversationState.UNACCEPTED))
+		return _400('The user has not accepted this conversation');
 
-    const incomingMessageMetaData = {
-        headers: headers,
-        statusCode: 200,
-        body: JSON.stringify({
-            messageSid: event.body.messageSid,
-            initialMessage: event.body.Body,
-            lightUsersPhoneNumber: event.body.From,
+	const twMessage = {
+		from: conversation.user_phone_proxy, 
+		to: conversation.light_phone, 
+		body: messageContent
+	};
+	console.log(`Sending message: ${JSON.stringify(twMessage)}`);
+	const twMessageInstance = await twilioClient.messages.create(twMessage);
+	console.log(`Twilio Response: ${JSON.stringify(twMessageInstance)}`);
 
-        })
+	return _200('Success!!!');
+}
 
-    };
-    let TableName = 'user';
-    const params ={
-        TableName,
-        Key: {
-            phoneNumber: event.body.to,
-        },
+module.exports.handler = async (event, context, callback) => {
 
-    };
-    const validUser = await documentClient.get(params).promise();
-    if (!validUser || !validUser.Item) {
-        throw Error(`There was an error fetching the phone number of ${phoneNumber} from ${TableName}`);
-    }
-    console.log(validUser);
-    console.log(incomingMessageMetaData);
-    // is this a first time message?
+	const originPhone = (event.body.From + '').replace(/\D/g, '');
+	const targetPhone = (event.body.To + '').replace(/\D/g, '');
+	const messageContent = event.body.Body;
+	
+	console.log(`Incoming message: ${originPhone} - ${targetPhone}: ${messageContent}`)
 
+	// Get conversations where the origin phone number is the user
+	const userConvQueryResult = await DynamoDB.Query({
+			TableName: 'conversation', 
+			IndexName: 'UserPhoneIndex', 
+			KeyConditionExpression: 'user_phone = :user_phone',
+			ExpressionAttributeValues: {':user_phone': originPhone} 
+		}, 
+		'User Conversation Query');
 
+	const isUser = userConvQueryResult.Items.length > 0;
+	if (isUser)
+	{
+		const userQueryResult = await DynamoDB.Query({
+			TableName: 'user',
+			IndexName: 'PhoneNumberIndex',
+			KeyConditionExpression: 'phone_number = :phone_number',
+			ExpressionAttributeValues: { ':phone_number': originPhone }
+		}, 'User Query');
+		
+		const user = userQueryResult.Items[0];
+		if (user.message_allowance < 1)
+			return _400('User has exceeded message allowance');
+		
+		const sendMessageResult = await getConversationAndSendMessage(userConvQueryResult.Items, originPhone, isUser, messageContent);
 
-    // Does the incoming new message have a user return true or false to initiate conversation?
+		user.message_allowance -= 1;
+		const db = new AWS.DynamoDB.DocumentClient();
+		const userSaveResult = await db.put({TableName: 'user', Item: user}).promise();
+		console.log(`User Save Result: ${JSON.stringify(userSaveResult)}`)
 
+		return sendMessageResult;
+	}
+	else
+	{
+		// Get the conversations where the origin phone number is the lightuser
+		const lightConvQueryResult = await DynamoDB.Query({
+			TableName: 'conversation', 
+			IndexName: 'LightPhoneIndex', 
+			KeyConditionExpression: 'light_phone = :light_phone',
+			ExpressionAttributeValues: {':light_phone': originPhone} 
+		}, 
+		'LightUser Conversation Query');
 
-   /* var newMessageResponse = {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json",
-            'Access-Control-Allow-Origin': '*'
-        },
-
-        "body": "{\n  \"validNumber\": true,\n}"
-
-    };
-    var lambdaParams = {
-        FunctionName: "initializeConversation",
-        Payload: incomingMessageMetaData,
-        Qualifier: "1"
-    };
-    lambda.invokeAsync(lambdaParams, function(err, data) {
-        if (err) console.log(err, err.stack); // an error occurred
-        else     console.log(data);           // successful response
-        /*
-        data = {
-         Payload: ,
-         StatusCode: 200
-        }
-
-    });*/
-
-
-
+		return await getConversationAndSendMessage(lightConvQueryResult.Items, originPhone, isUser, messageContent);
+	}
 };

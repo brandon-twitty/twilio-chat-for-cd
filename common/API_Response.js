@@ -12,6 +12,7 @@ const Responses = {
     },
 
     _400(data = {}) {
+		console.log(`Returning 400: ${data}`);
         return {
             headers: {
                 'Content-Type': 'application/json',
@@ -21,7 +22,20 @@ const Responses = {
             statusCode: 400,
             body: JSON.stringify(data),
         };
-    },
+	},
+	
+	_500(data = {}) {
+		console.log(`Returning 500: ${data}`);
+		return {
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Methods': '*',
+				'Access-Control-Allow-Origins': '*',
+			},
+			statusCode: 500,
+			body: JSON.stringify(data),
+		}
+	}
 };
 
 module.exports = Responses;
