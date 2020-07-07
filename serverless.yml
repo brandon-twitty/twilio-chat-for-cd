@@ -2,7 +2,7 @@ service: twilio-lambda-functions
 frameworkVersion: ">=1.1.0 <2.0.0"
 plugins:
   - serverless-dotenv-plugin
-  #  - serverless-bundle
+  #  - serverless-bundlesls
 provider:
   name: aws
   runtime: nodejs12.x
@@ -11,7 +11,6 @@ provider:
   memorySize: 256
   timeout: 10
   environment:
-    tableName: ${self:custom.tableName}
     twilioAccountSid: ${env:TWILIO_ACCOUNT_SID}
     twilioAuthToken: ${env:TWILIO_AUTH_TOKEN}
   iamRoleStatements:
@@ -24,9 +23,6 @@ provider:
   package:
     individually: true
 
-custom:
-  tableName: conversation
-
 functions:
   SendSms:
     handler: handler.sendSms
@@ -37,64 +33,78 @@ functions:
           integration: lambda
           cors: true
   ReceiveSms:
-    handler: lambda-endpoints/receive_webhook.receiveSms
+    handler: lambda-endpoints/receive_webhook.handler
     events:
       - http:
           path: api/receiveSms
           method: post
           integration: lambda
           cors: true
-  initializeConversation:
-    handler: lambda-endpoints/initializeConversation.handler
+  StartConversation:
+    handler: lambda-endpoints/startConversation.handler
     events:
       - http:
-          path: intialize-conversation
+          path: api/start-conversation
           method: post
-          integration: lambda
-          cors: true
-  maskNumbers:
-    handler: lambda-endpoints/maskNumber.handler
-    events:
-      - http:
-          path: mask-number
-          method: post
-          integration: lambda
-          cors: true
-  handleConversations:
-    handler: lambda-endpoints/handleConversations.handler
-    events:
-      - http:
-          path: handle-conversations
-          method: post
-          integration: lambda
-          cors: true
-  countMessages:
-    handler: lambda-endpoints/countMessages.handler
-    events:
-      - http:
-          path: count-messages
-          method: post
-          integration: lambda
-          cors: true
-  updateUsers:
-    handler: lambda-endpoints/updateUsers.handler
-    events:
-      - http:
-          path: update-user
-          method: put
           integration: lambda
           cors: true
 
 resources:
   Resources:
-    MyDynamoDbTable:
+    UserTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.tableName}
+        TableName: user
         AttributeDefinitions:
           - AttributeName: ID
+            AttributeType: S
+          - AttributeName: card_id
+            AttributeType: S
+          - AttributeName: phone_number
             AttributeType: S
         KeySchema:
           - AttributeName: ID
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: cardIdIndex
+            KeySchema:
+              - AttributeName: card_id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: PhoneNumberIndex
+            KeySchema:
+              - AttributeName: phone_number
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
+    ConversationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: conversation
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+          - AttributeName: user_phone
+            AttributeType: S
+          - AttributeName: light_phone
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: LightPhoneIndex
+            KeySchema:
+              - AttributeName: light_phone
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: UserPhoneIndex
+            KeySchema:
+              - AttributeName: user_phone
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        
