@@ -19,8 +19,8 @@ async function getConversationAndSendMessage(conversations, originPhone, isUser,
 		return _400('The user has not accepted this conversation');
 
 	const twMessage = {
-		from: conversation.user_phone_proxy, 
-		to: conversation.light_phone, 
+		from: (isUser ? conversation.user_phone_proxy : conversation.light_phone_proxy), 
+		to: (isUser ? conversation.light_phone : conversation.user_phone), 
 		body: messageContent
 	};
 	console.log(`Sending message: ${JSON.stringify(twMessage)}`);
@@ -32,11 +32,11 @@ async function getConversationAndSendMessage(conversations, originPhone, isUser,
 
 module.exports.handler = async (event, context, callback) => {
 
+	console.log(`Incoming message: ${JSON.stringify(event.body)}`)
+
 	const originPhone = (event.body.From + '').replace(/\D/g, '');
 	const targetPhone = (event.body.To + '').replace(/\D/g, '');
 	const messageContent = event.body.Body;
-	
-	console.log(`Incoming message: ${originPhone} - ${targetPhone}: ${messageContent}`)
 
 	// Get conversations where the origin phone number is the user
 	const userConvQueryResult = await DynamoDB.Query({
