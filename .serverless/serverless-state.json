@@ -96,7 +96,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-SendSms",
               "Handler": "handler.sendSms",
@@ -118,14 +118,14 @@
               "SendSmsLogGroup"
             ]
           },
-          "SendSmsLambdaVersionMEjKNPS97jX0sECQzgbS5cVwOkkC6ZVSMV9xmX7Vr0": {
+          "SendSmsLambdaVersionqJ8v1ItHhwpMqgToMmmPUt07uTsIol6URbvKYstw": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "SendSmsLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "ReceiveSmsLambdaFunction": {
@@ -135,7 +135,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-ReceiveSms",
               "Handler": "lambda-endpoints/receive_webhook.receiveSms",
@@ -157,14 +157,14 @@
               "ReceiveSmsLogGroup"
             ]
           },
-          "ReceiveSmsLambdaVersionmvWsWsHFy45D7JG6HXs9zYBwopxmp3jFw3C7ZoVpiRM": {
+          "ReceiveSmsLambdaVersioncL2ZIzQgURYimjNmXxbRy29jLUB6BKw7rvqdBgL98": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ReceiveSmsLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "InitializeConversationLambdaFunction": {
@@ -174,7 +174,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-initializeConversation",
               "Handler": "lambda-endpoints/initializeConversation.handler",
@@ -196,14 +196,14 @@
               "InitializeConversationLogGroup"
             ]
           },
-          "InitializeConversationLambdaVersionrHpXKyTCPgNk8DmudgCtQPpsBL3BA2iTL3A2lU6Ik": {
+          "InitializeConversationLambdaVersionm9Ki0mmsdMViW4QMNWfGfHW5B2vk5ZDMHku1EJkqJ9s": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "InitializeConversationLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "MaskNumbersLambdaFunction": {
@@ -213,7 +213,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-maskNumbers",
               "Handler": "lambda-endpoints/maskNumber.handler",
@@ -235,14 +235,14 @@
               "MaskNumbersLogGroup"
             ]
           },
-          "MaskNumbersLambdaVersionGfeasHmAp6ikUanQG1q5X52hIDkkGkIMavwbjUNWE": {
+          "MaskNumbersLambdaVersion9BWGCEs2ba5AvQ9iZwaPDpgGCS2Kc3AOnR5FgaiI": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "MaskNumbersLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "HandleConversationsLambdaFunction": {
@@ -252,7 +252,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-handleConversations",
               "Handler": "lambda-endpoints/handleConversations.handler",
@@ -274,14 +274,14 @@
               "HandleConversationsLogGroup"
             ]
           },
-          "HandleConversationsLambdaVersionatld1ngqOHn3L3XOI4FTciRu4VEBoVzQaqJrHNeY": {
+          "HandleConversationsLambdaVersionTUX7CF2QKrHrON8meJvwB9kOQjUs7wBzGNdEGA61gno": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "HandleConversationsLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "CountMessagesLambdaFunction": {
@@ -291,7 +291,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-countMessages",
               "Handler": "lambda-endpoints/countMessages.handler",
@@ -313,14 +313,14 @@
               "CountMessagesLogGroup"
             ]
           },
-          "CountMessagesLambdaVersionU29kSOF69ctLhAF0mOVZXwhmTNiPm33uo95uVxOz8": {
+          "CountMessagesLambdaVersiontOvimDC0MW16XAhJoOB7ZZliAuMMjOzMySAuc1VJjO0": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "CountMessagesLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "UpdateUsersLambdaFunction": {
@@ -330,7 +330,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-updateUsers",
               "Handler": "lambda-endpoints/updateUsers.handler",
@@ -352,14 +352,14 @@
               "UpdateUsersLogGroup"
             ]
           },
-          "UpdateUsersLambdaVersionQwk2j6Z0nUnTT4Lltmt1Qb4CX40mQaHzVOExgdgo": {
+          "UpdateUsersLambdaVersionZiCoNXwoELmJ6xJmqtSnjeG2lWGuPrtPBhBeJjf8LY": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "UpdateUsersLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "ReturnFailMessageLambdaFunction": {
@@ -369,7 +369,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-returnFailMessage",
               "Handler": "lambda-endpoints/returnFailMessage.handler",
@@ -391,14 +391,14 @@
               "ReturnFailMessageLogGroup"
             ]
           },
-          "ReturnFailMessageLambdaVersionCxcdWFxL2WVuPEJOCHLQEpmNTpgYj6APQ4QhMmR8fA": {
+          "ReturnFailMessageLambdaVersionIOReXrrynWlxtjpVuUqWZxdi2u2AkVGOGw7rotO4": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ReturnFailMessageLambdaFunction"
               },
-              "CodeSha256": "XRa+TTMMCsbhtU/3vzZkSA+Jy/me6qgGBsE2dh5XOCk="
+              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
             }
           },
           "ApiGatewayRestApi": {
@@ -2150,7 +2150,7 @@
               ]
             }
           },
-          "ApiGatewayDeployment1593126237123": {
+          "ApiGatewayDeployment1593465688432": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -2574,49 +2574,49 @@
           "SendSmsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "SendSmsLambdaVersionMEjKNPS97jX0sECQzgbS5cVwOkkC6ZVSMV9xmX7Vr0"
+              "Ref": "SendSmsLambdaVersionqJ8v1ItHhwpMqgToMmmPUt07uTsIol6URbvKYstw"
             }
           },
           "ReceiveSmsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ReceiveSmsLambdaVersionmvWsWsHFy45D7JG6HXs9zYBwopxmp3jFw3C7ZoVpiRM"
+              "Ref": "ReceiveSmsLambdaVersioncL2ZIzQgURYimjNmXxbRy29jLUB6BKw7rvqdBgL98"
             }
           },
           "InitializeConversationLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "InitializeConversationLambdaVersionrHpXKyTCPgNk8DmudgCtQPpsBL3BA2iTL3A2lU6Ik"
+              "Ref": "InitializeConversationLambdaVersionm9Ki0mmsdMViW4QMNWfGfHW5B2vk5ZDMHku1EJkqJ9s"
             }
           },
           "MaskNumbersLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MaskNumbersLambdaVersionGfeasHmAp6ikUanQG1q5X52hIDkkGkIMavwbjUNWE"
+              "Ref": "MaskNumbersLambdaVersion9BWGCEs2ba5AvQ9iZwaPDpgGCS2Kc3AOnR5FgaiI"
             }
           },
           "HandleConversationsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HandleConversationsLambdaVersionatld1ngqOHn3L3XOI4FTciRu4VEBoVzQaqJrHNeY"
+              "Ref": "HandleConversationsLambdaVersionTUX7CF2QKrHrON8meJvwB9kOQjUs7wBzGNdEGA61gno"
             }
           },
           "CountMessagesLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CountMessagesLambdaVersionU29kSOF69ctLhAF0mOVZXwhmTNiPm33uo95uVxOz8"
+              "Ref": "CountMessagesLambdaVersiontOvimDC0MW16XAhJoOB7ZZliAuMMjOzMySAuc1VJjO0"
             }
           },
           "UpdateUsersLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "UpdateUsersLambdaVersionQwk2j6Z0nUnTT4Lltmt1Qb4CX40mQaHzVOExgdgo"
+              "Ref": "UpdateUsersLambdaVersionZiCoNXwoELmJ6xJmqtSnjeG2lWGuPrtPBhBeJjf8LY"
             }
           },
           "ReturnFailMessageLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ReturnFailMessageLambdaVersionCxcdWFxL2WVuPEJOCHLQEpmNTpgYj6APQ4QhMmR8fA"
+              "Ref": "ReturnFailMessageLambdaVersionIOReXrrynWlxtjpVuUqWZxdi2u2AkVGOGw7rotO4"
             }
           },
           "ServiceEndpoint": {
@@ -3055,7 +3055,7 @@
     "artifact": "C:\\Users\\user\\Google Drive\\my-repo\\dave kley\\dat.cards\\card-date-app\\backend\\twilio-serverless\\.serverless\\twilio-lambda-functions.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/twilio-lambda-functions/dev/1593126232468-2020-06-25T23:03:52.468Z",
+    "artifactDirectoryName": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z",
     "artifact": "twilio-lambda-functions.zip"
   }
 }
