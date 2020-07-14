@@ -12,7 +12,7 @@ exports.handler = async (event, context, callback) => {
 	
 	console.log(`Received Event: ${JSON.stringify(event)}`);
 	
-	const {body: {card_id, firstName, phoneNumber, message}} = event;
+	const {body: {cardId, firstName, phoneNumber, initialMessage}} = event;
 
 	// Make sure phone_number is a string and strip all non-numbers
 	const lightPhone = (phoneNumber+'').replace(/\D/g, '');
@@ -24,7 +24,7 @@ exports.handler = async (event, context, callback) => {
 			TableName: 'user', 
 			IndexName: 'cardIdIndex', 
 			KeyConditionExpression: 'card_id = :card_id', 
-			ExpressionAttributeValues: {':card_id': card_id}
+			ExpressionAttributeValues: {':card_id': cardId}
 		}, 
 		'Query User');
 	if (userQueryResult.Items.length < 1)
@@ -77,8 +77,10 @@ exports.handler = async (event, context, callback) => {
 		ID: uuid.v1(),
 		user_phone: user.phone_number,
 		user_phone_proxy: userPhoneProxy,
+		light_user_name: firstName,
 		light_phone: lightPhone,
 		light_phone_proxy: lightPhoneProxy,
+		initial_message: initialMessage,
 		states: [ConversationState.UNACCEPTED]
 	};
 	const db = new AWS.DynamoDB.DocumentClient();
