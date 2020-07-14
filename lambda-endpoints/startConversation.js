@@ -12,10 +12,10 @@ exports.handler = async (event, context, callback) => {
 	
 	console.log(`Received Event: ${JSON.stringify(event)}`);
 	
-	const {body: {card_id, name, phone_number, message}} = event;
+	const {body: {card_id, firstName, phoneNumber, message}} = event;
 
 	// Make sure phone_number is a string and strip all non-numbers
-	const lightPhone = (phone_number+'').replace(/\D/g, '');
+	const lightPhone = (phoneNumber+'').replace(/\D/g, '');
 	if (lightPhone == '')
 		return _400('Invalid phone number');
 	
@@ -35,6 +35,12 @@ exports.handler = async (event, context, callback) => {
 	// ...
 
 	// temporary hard coded list of numbers until this becomes more dynamic
+	/*
+	code to get numbers from twilio account
+	const twilioNumbers = await twilioClient.incomingPhoneNumbers
+        .list()
+        .then(incomingPhoneNumbers => incomingPhoneNumbers.forEach(i => console.log(i.phoneNumber)));
+	 */
 	const available_numbers = ['13143104002', '13143754245', '13143103033'];
 	
 	// Given an array of phone numbers in use, return the first available number from the list above that isn't already used - or null if all are

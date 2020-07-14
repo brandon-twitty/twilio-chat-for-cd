@@ -22,6 +22,16 @@ provider:
 
   package:
     individually: true
+  #custom:
+  #  swaggerApi:
+  #    updateDeployemnts: true
+  #    usePackageVersion: true
+   #     apis:
+    #      PrimaryApi:
+     #       Name: ${self:provider.stage}-${self:service}-PrimaryApi
+      #      Body: ${file(./some-swagger-file.yaml)}
+       #     Lambda: StartConversation
+        #    Stage: dev
 
 functions:
   SendSms:
