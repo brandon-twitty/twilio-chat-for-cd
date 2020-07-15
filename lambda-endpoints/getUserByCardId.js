@@ -1,5 +1,6 @@
 'use strict';
 const Dynamo= require( '../common/Dynamo');
+const DynamoDB = require('../common/DynamoDB');
 exports.handler = async (event) => {
     console.log(event);
     if (event.httpMethod === 'GET') {
@@ -19,8 +20,8 @@ const done = response => {
     }
 };
 const getUserByCardId = async event => {
-    let cardId = event.pathParmeters.cardId;
-    let data = await Dynamo.scan('card_id', cardId, 'user');
-    console.log(data);
+    let card_Id = event.pathParmeters.cardId;
+    let data = await Dynamo.scan('card_id', card_Id, 'user');
+    console.log('get user data by card Id', data);
     return data;
 };
