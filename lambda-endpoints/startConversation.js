@@ -14,10 +14,12 @@ exports.handler = async (event, context, callback) => {
 	
 	const {body: {card_id, name, phone_number, message}} = event;
 
-	// Make sure phone_number is a string and strip all non-numbers
-	const lightPhone = (phone_number+'').replace(/\D/g, '');
-	if (lightPhone == '')
+	// Make sure phone_number is a string and strip all non-numbers, prefixing with country code 1 as a default
+	let lightPhone = (phone_number+'').replace(/\D/g, '');
+	if (lightPhone == '' || lightPhone.length < 10)
 		return _400('Invalid phone number');
+	if (lightPhone.length == 10)
+		lightPhone = '1' + lightPhone;
 	
 	// Get the user so we can get make sure this is a valid card and get the user's phone number
 	const userQueryResult = await DynamoDB.Query({
@@ -77,7 +79,7 @@ exports.handler = async (event, context, callback) => {
 	};
 	const db = new AWS.DynamoDB.DocumentClient();
 	const conversationSaveResult = await db.put({TableName: 'conversation', Item: conversation}).promise();
-	console.log(`Conversation Save Result: ${conversationSaveResult}`);
+	console.log(`Conversation Save Result: ${JSON.stringify(conversationSaveResult)}`);
 
 	return _200('Success!!!');
 };
