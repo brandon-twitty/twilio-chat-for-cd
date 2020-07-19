@@ -42,7 +42,7 @@ exports.handler = async (event, context, callback) => {
 	// Given an array of phone numbers in use, return the first available number from the list above that isn't already used - or null if all are
 	const proxyNumberResolver = inUseNumbers => (choices => choices.length > 0 ? choices[0] : null)(available_numbers.filter(availableNumber => !inUseNumbers.includes(availableNumber)));
 	
-	// Get proxy numbers the user is already using in other conversations
+	// Get proxy numbers the user is already interacting with in other conversations so they aren't double-assigned
 	const userConvQueryResult = await DynamoDB.Query({
 			TableName: 'conversation', 
 			IndexName: 'UserPhoneIndex', 
@@ -50,12 +50,12 @@ exports.handler = async (event, context, callback) => {
 			ExpressionAttributeValues: {':user_phone': user.phone_number} 
 		}, 
 		'User Conversation Query');
-	const userPhoneProxy = proxyNumberResolver(userConvQueryResult.Items.map(c => c.user_phone_proxy));
-	console.log(`Chose User Proxy Number: ${userPhoneProxy}`);
-	if (userPhoneProxy == null)
-		return _500('No available proxy phone numbers for user');
+	const lightPhoneProxy = proxyNumberResolver(userConvQueryResult.Items.map(c => c.light_phone_proxy));
+	console.log(`Chose LightUser Proxy Number: ${lightPhoneProxy}`);
+	if (lightPhoneProxy == null)
+		return _500('No available proxy phone numbers for light user');
 
-	// Get the proxy numbers the lightuser is already using in other conversations
+	// Get the proxy numbers the lightuser is already interacting with in other conversations so they aren't double-assigned
 	const lightConvQueryResult = await DynamoDB.Query({
 			TableName: 'conversation', 
 			IndexName: 'LightPhoneIndex', 
@@ -63,10 +63,10 @@ exports.handler = async (event, context, callback) => {
 			ExpressionAttributeValues: {':light_phone': lightPhone} 
 		}, 
 		'LightUser Conversation Query');
-	const lightPhoneProxy = proxyNumberResolver(lightConvQueryResult.Items.map(c => c.light_phone_proxy));
-	console.log(`Chose User Proxy Number: ${lightPhoneProxy}`);
-	if (lightPhoneProxy == null)
-		return _500('No available proxy phone numbers for light user');
+	const userPhoneProxy = proxyNumberResolver(lightConvQueryResult.Items.map(c => c.user_phone_proxy));
+	console.log(`Chose User Proxy Number: ${userPhoneProxy}`);
+	if (userPhoneProxy == null)
+		return _500('No available proxy phone numbers for user');
 	
 	// Create and store the conversation
 	const conversation = {

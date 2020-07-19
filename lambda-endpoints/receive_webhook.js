@@ -47,7 +47,7 @@ module.exports.handler = async (event, context, callback) => {
 		}, 
 		'User Conversation Query');
 
-	const isUser = userConvQueryResult.Items.length > 0;
+	const isUser = userConvQueryResult.Items.filter(c => originPhone == c.user_phone && targetPhone == c.light_phone_proxy).length > 0;
 	if (isUser)
 	{
 		const userQueryResult = await DynamoDB.Query({
