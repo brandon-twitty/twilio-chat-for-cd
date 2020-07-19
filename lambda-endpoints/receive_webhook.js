@@ -11,7 +11,7 @@ const { _200, _400 } = require('../common/API_Response');
 
 async function getConversationAndSendMessage(conversations, originPhone, targetPhone, isUser, messageContent)
 {
-	const conversation = conversations.filter(c => originPhone == (isUser ? c.user_phone : c.light_phone) && targetPhone ==(isUser ? c.light_phone_proxy : user_phone_proxy))[0];
+	const conversation = conversations.filter(c => originPhone == (isUser ? c.user_phone : c.light_phone) && targetPhone == (isUser ? c.light_phone_proxy : c.user_phone_proxy))[0];
 	if (conversation == null)
 		return _400('No such conversation exists');
 
