@@ -36,6 +36,10 @@ exports.handler = async (event, context, callback) => {
 	// Set up the light user
 	// ...
 
+	// Prevent same-number conversations
+	if (user.phone_number == lightPhone)
+		return _400("Can't converse with yourself");
+
 	// temporary hard coded list of numbers until this becomes more dynamic
 	const available_numbers = ['13143104002', '13143754245', '13143103033'];
 	
