@@ -17,19 +17,19 @@ exports.handler = async (event, context, callback) => {
 	
 	const {body: {card_id, name, phone_number, message}} = event;
 
-	// Make sure phone_number is a string and strip all non-numbers, prefixing with country code 1 as a default
-	let lightPhone = (phone_number+'').replace(/\D/g, '');
-	if (lightPhone == '' || lightPhone.length < 10)
+	// Make sure phone_number is a string and strip all non-numbers
+	const lightPhone = (phone_number+'').replace(/\D/g, '');
+	if (lightPhone == '')
 		return _400('Invalid phone number');
 	if (lightPhone.length == 10)
 		lightPhone = '1' + lightPhone;
-	
+
 	// Get the user so we can get make sure this is a valid card and get the user's phone number
 	const userQueryResult = await DynamoDB.Query({
 			TableName: 'user', 
 			IndexName: 'cardIdIndex', 
 			KeyConditionExpression: 'card_id = :card_id', 
-			ExpressionAttributeValues: {':card_id': card_id}
+			ExpressionAttributeValues: {':card_id': cardId}
 		}, 
 		'Query User');
 	if (userQueryResult.Items.length < 1)
@@ -44,6 +44,12 @@ exports.handler = async (event, context, callback) => {
 		return _400("Can't converse with yourself");
 
 	// temporary hard coded list of numbers until this becomes more dynamic
+	/*
+	code to get numbers from twilio account
+	const twilioNumbers = await twilioClient.incomingPhoneNumbers
+        .list()
+        .then(incomingPhoneNumbers => incomingPhoneNumbers.forEach(i => console.log(i.phoneNumber)));
+	 */
 	const available_numbers = ['13143104002', '13143754245', '13143103033'];
 	
 	// Given an array of phone numbers in use, return the first available number from the list above that isn't already used - or null if all are

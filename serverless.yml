@@ -22,6 +22,16 @@ provider:
 
   package:
     individually: true
+  #custom:
+  #  swaggerApi:
+  #    updateDeployemnts: true
+  #    usePackageVersion: true
+   #     apis:
+    #      PrimaryApi:
+     #       Name: ${self:provider.stage}-${self:service}-PrimaryApi
+      #      Body: ${file(./some-swagger-file.yaml)}
+       #     Lambda: StartConversation
+        #    Stage: dev
 
 functions:
   SendSms:
@@ -46,6 +56,14 @@ functions:
       - http:
           path: api/start-conversation
           method: post
+          integration: lambda
+          cors: true
+  GetUserByCardId:
+    handler: lambda-endpoints/getUserByCardId.handler
+    events:
+      - http:
+          path: api/get-user-by-card-id
+          method: GET
           integration: lambda
           cors: true
 

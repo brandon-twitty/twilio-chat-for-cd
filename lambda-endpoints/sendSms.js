@@ -8,7 +8,7 @@ const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = require('twilio')(twilioAccountSid, twilioAuthToken);
 
 module.exports.handler = async ( event, context, callback) => {
-
+        console.log('message from carddate UI', event);
     const sms = {
         to: event.body.userProfilePhone,
         from: event.body.lightUsersPhoneNumber,
