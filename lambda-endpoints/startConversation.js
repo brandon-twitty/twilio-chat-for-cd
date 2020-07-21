@@ -5,6 +5,9 @@ const uuid = require ("uuid");
 const { _200, _400, _500 } = require('../common/API_Response');
 const DynamoDB = require('../common/DynamoDB');
 const ConversationState = require('../common/ConversationState');
+const SmsService = require('../common/SmsService');
+const SystemMessages = require('../common/SystemMessages');
+
 /*
 
 */
@@ -79,11 +82,25 @@ exports.handler = async (event, context, callback) => {
 		user_phone_proxy: userPhoneProxy,
 		light_phone: lightPhone,
 		light_phone_proxy: lightPhoneProxy,
-		states: [ConversationState.UNACCEPTED]
+		states: [ConversationState.UNACCEPTED],
+		initial_message: message,
+		light_user_name: name
 	};
 	const db = new AWS.DynamoDB.DocumentClient();
 	const conversationSaveResult = await db.put({TableName: 'conversation', Item: conversation}).promise();
 	console.log(`Conversation Save Result: ${JSON.stringify(conversationSaveResult)}`);
+
+	const smsService = new SmsService();
+	if (user.message_allowance > 0)
+		await Promise.allSettled([
+			smsService.send(user.phone_number, lightPhoneProxy, SystemMessages.StartConversation_Normal_CardUser(name, message)),
+			smsService.send(phone_number, userPhoneProxy, SystemMessages.StartConversation_Normal_LightUser(user.firstName))
+		]);
+	else
+		await Promise.allSettled([
+			smsService.send(user.phone_number, lightPhoneProxy, SystemMessages.StartConversation_OutOfConversations_CardUser(name, message)),
+			smsService.send(phone_number, userPhoneProxy, SystemMessages.StartConversation_OutOfConversations_LightUser(user.firstName))
+		]);
 
 	return _200('Success!!!');
 };
