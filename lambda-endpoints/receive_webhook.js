@@ -9,9 +9,9 @@ const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioClient = require('twilio')(twilioAccountSid, twilioAuthToken);
 const { _200, _400 } = require('../common/API_Response');
 
-async function getConversationAndSendMessage(conversations, originPhone, isUser, messageContent)
+async function getConversationAndSendMessage(conversations, originPhone, targetPhone, isUser, messageContent)
 {
-	const conversation = conversations.filter(c => originPhone == (isUser ? c.user_phone : c.light_phone))[0];
+	const conversation = conversations.filter(c => originPhone == (isUser ? c.user_phone : c.light_phone) && targetPhone == (isUser ? c.light_phone_proxy : c.user_phone_proxy))[0];
 	if (conversation == null)
 		return _400('No such conversation exists');
 
@@ -47,7 +47,7 @@ module.exports.handler = async (event, context, callback) => {
 		}, 
 		'User Conversation Query');
 
-	const isUser = userConvQueryResult.Items.length > 0;
+	const isUser = userConvQueryResult.Items.filter(c => originPhone == c.user_phone && targetPhone == c.light_phone_proxy).length > 0;
 	if (isUser)
 	{
 		const userQueryResult = await DynamoDB.Query({
@@ -61,7 +61,7 @@ module.exports.handler = async (event, context, callback) => {
 		if (user.message_allowance < 1)
 			return _400('User has exceeded message allowance');
 		
-		const sendMessageResult = await getConversationAndSendMessage(userConvQueryResult.Items, originPhone, isUser, messageContent);
+		const sendMessageResult = await getConversationAndSendMessage(userConvQueryResult.Items, originPhone, targetPhone, isUser, messageContent);
 
 		user.message_allowance -= 1;
 		const db = new AWS.DynamoDB.DocumentClient();
@@ -81,6 +81,6 @@ module.exports.handler = async (event, context, callback) => {
 		}, 
 		'LightUser Conversation Query');
 
-		return await getConversationAndSendMessage(lightConvQueryResult.Items, originPhone, isUser, messageContent);
+		return await getConversationAndSendMessage(lightConvQueryResult.Items, originPhone, targetPhone, isUser, messageContent);
 	}
 };
