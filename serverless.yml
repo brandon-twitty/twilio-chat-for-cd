@@ -2,7 +2,7 @@ service: twilio-lambda-functions
 frameworkVersion: ">=1.1.0 <2.0.0"
 plugins:
   - serverless-dotenv-plugin
-  #  - serverless-bundlesls
+  # - serverless-webpack
 provider:
   name: aws
   runtime: nodejs12.x
@@ -21,7 +21,11 @@ provider:
       Resource: '*'
 
   package:
+    exclude:
+      -node_modules/**
+      -venv/**
     individually: true
+
   #custom:
   #  swaggerApi:
   #    updateDeployemnts: true
@@ -62,7 +66,7 @@ functions:
     handler: lambda-endpoints/getUserByCardId.handler
     events:
       - http:
-          path: api/get-user-by-card-id
+          path: api/get-user-by-card-id/{card_Id}
           method: GET
           integration: lambda
           cors: true
