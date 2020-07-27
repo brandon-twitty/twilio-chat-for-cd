@@ -20,7 +20,7 @@ const done = response => {
     }
 };
 const getUserByCardId = async (event, context, callback) => {
-    const card_id = event.pathParmeters.cardId;
+    const card_id = event.pathParmeters.card_id;
     const results = await DynamoDB.Query({
         TableName: 'user',
         IndexName: 'cardIdIndex',
