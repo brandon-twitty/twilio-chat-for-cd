@@ -8,19 +8,19 @@
   "author": "Brandon Twitty",
   "license": "ISC",
   "dependencies": {
-    "dirty-chai": "^2.0.1",
     "dotenv": "^8.2.0",
+    "serverless-s3-sync": "^1.10.6",
     "request": "^2.81.0",
-    "serverless-swagger-api": "^1.4.2",
     "twilio": "^3.46.0",
     "uuid": "^2.0.3"
   },
   "devDependencies": {
-    "serverless": "^1.72.0",
+    "aws-sdk": "^2.639.0",
+    "serverless": "^1.75.1",
     "serverless-dotenv-plugin": "^2.4.2",
     "serverless-http": "^2.5.0",
-    "serverless-mocha-plugin": "^1.12.0",
-    "serverless-webpack": "^5.3.2",
-    "webpack": "^4.43.0"
+    "serverless-webpack": "^5.3.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
   }
 }

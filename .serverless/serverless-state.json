@@ -6,15 +6,14 @@
     },
     "provider": {
       "stage": "dev",
-      "region": "us-east-2",
-      "variableSyntax": "\\${([ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}",
+      "variableSyntax": "\\${([^{}]+?)}",
       "name": "aws",
       "runtime": "nodejs12.x",
       "role": "arn:aws:iam::972126823319:role/lambdacarddate",
+      "region": "us-east-2",
       "memorySize": 256,
       "timeout": 10,
       "environment": {
-        "tableName": "conversation",
         "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
         "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
         "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
@@ -30,6 +29,7 @@
         }
       ],
       "package": {
+        "exclude": "-node_modules/** -venv/**",
         "individually": true
       },
       "versionFunctions": true,
@@ -39,7 +39,58 @@
         "Description": "The AWS CloudFormation template for this Serverless application",
         "Resources": {
           "ServerlessDeploymentBucket": {
-            "Type": "AWS::S3::Bucket"
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
           },
           "SendSmsLogGroup": {
             "Type": "AWS::Logs::LogGroup",
@@ -53,40 +104,16 @@
               "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-ReceiveSms"
             }
           },
-          "InitializeConversationLogGroup": {
+          "StartConversationLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-initializeConversation"
+              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-StartConversation"
             }
           },
-          "MaskNumbersLogGroup": {
+          "GetUserByCardIdLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-maskNumbers"
-            }
-          },
-          "HandleConversationsLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
-            "Properties": {
-              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-handleConversations"
-            }
-          },
-          "CountMessagesLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
-            "Properties": {
-              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-countMessages"
-            }
-          },
-          "UpdateUsersLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
-            "Properties": {
-              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-updateUsers"
-            }
-          },
-          "ReturnFailMessageLogGroup": {
-            "Type": "AWS::Logs::LogGroup",
-            "Properties": {
-              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-returnFailMessage"
+              "LogGroupName": "/aws/lambda/twilio-lambda-functions-dev-GetUserByCardId"
             }
           },
           "SendSmsLambdaFunction": {
@@ -96,7 +123,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1595866576035-2020-07-27T16:16:16.035Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-SendSms",
               "Handler": "handler.sendSms",
@@ -106,7 +133,6 @@
               "Timeout": 10,
               "Environment": {
                 "Variables": {
-                  "tableName": "conversation",
                   "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
                   "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
                   "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
@@ -118,14 +144,14 @@
               "SendSmsLogGroup"
             ]
           },
-          "SendSmsLambdaVersionqJ8v1ItHhwpMqgToMmmPUt07uTsIol6URbvKYstw": {
+          "SendSmsLambdaVersionL9TdjNMOgYfK52iMZHq9hMhoSIrdwFcDbkSRr2NnZI": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "SendSmsLambdaFunction"
               },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
+              "CodeSha256": "UhOIktLMnTWMWTBMqk4bta01vZXPHTN68vrnXlAlObk="
             }
           },
           "ReceiveSmsLambdaFunction": {
@@ -135,17 +161,16 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1595866576035-2020-07-27T16:16:16.035Z/twilio-lambda-functions.zip"
               },
               "FunctionName": "twilio-lambda-functions-dev-ReceiveSms",
-              "Handler": "lambda-endpoints/receive_webhook.receiveSms",
+              "Handler": "lambda-endpoints/receive_webhook.handler",
               "MemorySize": 256,
               "Role": "arn:aws:iam::972126823319:role/lambdacarddate",
               "Runtime": "nodejs12.x",
               "Timeout": 10,
               "Environment": {
                 "Variables": {
-                  "tableName": "conversation",
                   "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
                   "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
                   "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
@@ -157,34 +182,33 @@
               "ReceiveSmsLogGroup"
             ]
           },
-          "ReceiveSmsLambdaVersioncL2ZIzQgURYimjNmXxbRy29jLUB6BKw7rvqdBgL98": {
+          "ReceiveSmsLambdaVersionqPvtYcVUpIlHRjH6ueTjHCjXPP1O1lkYagksSYkaogE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ReceiveSmsLambdaFunction"
               },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
+              "CodeSha256": "UhOIktLMnTWMWTBMqk4bta01vZXPHTN68vrnXlAlObk="
             }
           },
-          "InitializeConversationLambdaFunction": {
+          "StartConversationLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1595866576035-2020-07-27T16:16:16.035Z/twilio-lambda-functions.zip"
               },
-              "FunctionName": "twilio-lambda-functions-dev-initializeConversation",
-              "Handler": "lambda-endpoints/initializeConversation.handler",
+              "FunctionName": "twilio-lambda-functions-dev-StartConversation",
+              "Handler": "lambda-endpoints/startConversation.handler",
               "MemorySize": 256,
               "Role": "arn:aws:iam::972126823319:role/lambdacarddate",
               "Runtime": "nodejs12.x",
               "Timeout": 10,
               "Environment": {
                 "Variables": {
-                  "tableName": "conversation",
                   "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
                   "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
                   "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
@@ -193,37 +217,36 @@
               }
             },
             "DependsOn": [
-              "InitializeConversationLogGroup"
+              "StartConversationLogGroup"
             ]
           },
-          "InitializeConversationLambdaVersionm9Ki0mmsdMViW4QMNWfGfHW5B2vk5ZDMHku1EJkqJ9s": {
+          "StartConversationLambdaVersion1eGAUEv5oWVT5Ufb8sSVdBtOG0VJ4NzzosksIw76g": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "InitializeConversationLambdaFunction"
+                "Ref": "StartConversationLambdaFunction"
               },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
+              "CodeSha256": "UhOIktLMnTWMWTBMqk4bta01vZXPHTN68vrnXlAlObk="
             }
           },
-          "MaskNumbersLambdaFunction": {
+          "GetUserByCardIdLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
+                "S3Key": "serverless/twilio-lambda-functions/dev/1595866576035-2020-07-27T16:16:16.035Z/twilio-lambda-functions.zip"
               },
-              "FunctionName": "twilio-lambda-functions-dev-maskNumbers",
-              "Handler": "lambda-endpoints/maskNumber.handler",
+              "FunctionName": "twilio-lambda-functions-dev-GetUserByCardId",
+              "Handler": "lambda-endpoints/getUserByCardId.handler",
               "MemorySize": 256,
               "Role": "arn:aws:iam::972126823319:role/lambdacarddate",
               "Runtime": "nodejs12.x",
               "Timeout": 10,
               "Environment": {
                 "Variables": {
-                  "tableName": "conversation",
                   "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
                   "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
                   "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
@@ -232,173 +255,17 @@
               }
             },
             "DependsOn": [
-              "MaskNumbersLogGroup"
+              "GetUserByCardIdLogGroup"
             ]
           },
-          "MaskNumbersLambdaVersion9BWGCEs2ba5AvQ9iZwaPDpgGCS2Kc3AOnR5FgaiI": {
+          "GetUserByCardIdLambdaVersionkdxQILDL14XgVWCJmqKxqcWghTmHkxnyWagXfddHYE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "MaskNumbersLambdaFunction"
+                "Ref": "GetUserByCardIdLambdaFunction"
               },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
-            }
-          },
-          "HandleConversationsLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
-              },
-              "FunctionName": "twilio-lambda-functions-dev-handleConversations",
-              "Handler": "lambda-endpoints/handleConversations.handler",
-              "MemorySize": 256,
-              "Role": "arn:aws:iam::972126823319:role/lambdacarddate",
-              "Runtime": "nodejs12.x",
-              "Timeout": 10,
-              "Environment": {
-                "Variables": {
-                  "tableName": "conversation",
-                  "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
-                  "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83"
-                }
-              }
-            },
-            "DependsOn": [
-              "HandleConversationsLogGroup"
-            ]
-          },
-          "HandleConversationsLambdaVersionTUX7CF2QKrHrON8meJvwB9kOQjUs7wBzGNdEGA61gno": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "HandleConversationsLambdaFunction"
-              },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
-            }
-          },
-          "CountMessagesLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
-              },
-              "FunctionName": "twilio-lambda-functions-dev-countMessages",
-              "Handler": "lambda-endpoints/countMessages.handler",
-              "MemorySize": 256,
-              "Role": "arn:aws:iam::972126823319:role/lambdacarddate",
-              "Runtime": "nodejs12.x",
-              "Timeout": 10,
-              "Environment": {
-                "Variables": {
-                  "tableName": "conversation",
-                  "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
-                  "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83"
-                }
-              }
-            },
-            "DependsOn": [
-              "CountMessagesLogGroup"
-            ]
-          },
-          "CountMessagesLambdaVersiontOvimDC0MW16XAhJoOB7ZZliAuMMjOzMySAuc1VJjO0": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "CountMessagesLambdaFunction"
-              },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
-            }
-          },
-          "UpdateUsersLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
-              },
-              "FunctionName": "twilio-lambda-functions-dev-updateUsers",
-              "Handler": "lambda-endpoints/updateUsers.handler",
-              "MemorySize": 256,
-              "Role": "arn:aws:iam::972126823319:role/lambdacarddate",
-              "Runtime": "nodejs12.x",
-              "Timeout": 10,
-              "Environment": {
-                "Variables": {
-                  "tableName": "conversation",
-                  "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
-                  "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83"
-                }
-              }
-            },
-            "DependsOn": [
-              "UpdateUsersLogGroup"
-            ]
-          },
-          "UpdateUsersLambdaVersionZiCoNXwoELmJ6xJmqtSnjeG2lWGuPrtPBhBeJjf8LY": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "UpdateUsersLambdaFunction"
-              },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
-            }
-          },
-          "ReturnFailMessageLambdaFunction": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-              "Code": {
-                "S3Bucket": {
-                  "Ref": "ServerlessDeploymentBucket"
-                },
-                "S3Key": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z/twilio-lambda-functions.zip"
-              },
-              "FunctionName": "twilio-lambda-functions-dev-returnFailMessage",
-              "Handler": "lambda-endpoints/returnFailMessage.handler",
-              "MemorySize": 256,
-              "Role": "arn:aws:iam::972126823319:role/lambdacarddate",
-              "Runtime": "nodejs12.x",
-              "Timeout": 10,
-              "Environment": {
-                "Variables": {
-                  "tableName": "conversation",
-                  "twilioAccountSid": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "twilioAuthToken": "4ee58b3faa8b0c267f20d51cbf809a83",
-                  "TWILIO_ACCOUNT_SID": "AC81ea16ec867a1fd9a781b51a20d8f7c6",
-                  "TWILIO_AUTH_TOKEN": "4ee58b3faa8b0c267f20d51cbf809a83"
-                }
-              }
-            },
-            "DependsOn": [
-              "ReturnFailMessageLogGroup"
-            ]
-          },
-          "ReturnFailMessageLambdaVersionIOReXrrynWlxtjpVuUqWZxdi2u2AkVGOGw7rotO4": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "ReturnFailMessageLambdaFunction"
-              },
-              "CodeSha256": "ECiwmgXn38O7/sck03WsO0g7A0WN3DiTXt/11mSL1EY="
+              "CodeSha256": "UhOIktLMnTWMWTBMqk4bta01vZXPHTN68vrnXlAlObk="
             }
           },
           "ApiGatewayRestApi": {
@@ -409,7 +276,8 @@
                 "Types": [
                   "EDGE"
                 ]
-              }
+              },
+              "Policy": ""
             }
           },
           "ApiGatewayResourceApi": {
@@ -451,76 +319,37 @@
               }
             }
           },
-          "ApiGatewayResourceIntializeDashconversation": {
+          "ApiGatewayResourceApiStartDashconversation": {
             "Type": "AWS::ApiGateway::Resource",
             "Properties": {
               "ParentId": {
-                "Fn::GetAtt": [
-                  "ApiGatewayRestApi",
-                  "RootResourceId"
-                ]
+                "Ref": "ApiGatewayResourceApi"
               },
-              "PathPart": "intialize-conversation",
+              "PathPart": "start-conversation",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayResourceMaskDashnumber": {
+          "ApiGatewayResourceApiGetDashuserDashbyDashcardDashid": {
             "Type": "AWS::ApiGateway::Resource",
             "Properties": {
               "ParentId": {
-                "Fn::GetAtt": [
-                  "ApiGatewayRestApi",
-                  "RootResourceId"
-                ]
+                "Ref": "ApiGatewayResourceApi"
               },
-              "PathPart": "mask-number",
+              "PathPart": "get-user-by-card-id",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayResourceHandleDashconversations": {
+          "ApiGatewayResourceApiGetDashuserDashbyDashcardDashidCardidVar": {
             "Type": "AWS::ApiGateway::Resource",
             "Properties": {
               "ParentId": {
-                "Fn::GetAtt": [
-                  "ApiGatewayRestApi",
-                  "RootResourceId"
-                ]
+                "Ref": "ApiGatewayResourceApiGetDashuserDashbyDashcardDashid"
               },
-              "PathPart": "handle-conversations",
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              }
-            }
-          },
-          "ApiGatewayResourceCountDashmessages": {
-            "Type": "AWS::ApiGateway::Resource",
-            "Properties": {
-              "ParentId": {
-                "Fn::GetAtt": [
-                  "ApiGatewayRestApi",
-                  "RootResourceId"
-                ]
-              },
-              "PathPart": "count-messages",
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              }
-            }
-          },
-          "ApiGatewayResourceUpdateDashuser": {
-            "Type": "AWS::ApiGateway::Resource",
-            "Properties": {
-              "ParentId": {
-                "Fn::GetAtt": [
-                  "ApiGatewayRestApi",
-                  "RootResourceId"
-                ]
-              },
-              "PathPart": "update-user",
+              "PathPart": "{card_Id}",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -537,8 +366,7 @@
                   "ResponseParameters": {
                     "method.response.header.Access-Control-Allow-Origin": true,
                     "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
+                    "method.response.header.Access-Control-Allow-Methods": true
                   },
                   "ResponseModels": {}
                 }
@@ -549,17 +377,17 @@
                 "RequestTemplates": {
                   "application/json": "{statusCode:200}"
                 },
+                "ContentHandling": "CONVERT_TO_TEXT",
                 "IntegrationResponses": [
                   {
                     "StatusCode": "200",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'",
                       "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": ""
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -583,8 +411,7 @@
                   "ResponseParameters": {
                     "method.response.header.Access-Control-Allow-Origin": true,
                     "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
+                    "method.response.header.Access-Control-Allow-Methods": true
                   },
                   "ResponseModels": {}
                 }
@@ -595,17 +422,17 @@
                 "RequestTemplates": {
                   "application/json": "{statusCode:200}"
                 },
+                "ContentHandling": "CONVERT_TO_TEXT",
                 "IntegrationResponses": [
                   {
                     "StatusCode": "200",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'",
                       "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": ""
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
@@ -618,7 +445,7 @@
               }
             }
           },
-          "ApiGatewayMethodIntializeDashconversationOptions": {
+          "ApiGatewayMethodApiStartDashconversationOptions": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "AuthorizationType": "NONE",
@@ -629,8 +456,7 @@
                   "ResponseParameters": {
                     "method.response.header.Access-Control-Allow-Origin": true,
                     "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
+                    "method.response.header.Access-Control-Allow-Methods": true
                   },
                   "ResponseModels": {}
                 }
@@ -641,30 +467,30 @@
                 "RequestTemplates": {
                   "application/json": "{statusCode:200}"
                 },
+                "ContentHandling": "CONVERT_TO_TEXT",
                 "IntegrationResponses": [
                   {
                     "StatusCode": "200",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'",
                       "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
                     },
                     "ResponseTemplates": {
-                      "application/json": ""
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
               },
               "ResourceId": {
-                "Ref": "ApiGatewayResourceIntializeDashconversation"
+                "Ref": "ApiGatewayResourceApiStartDashconversation"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayMethodMaskDashnumberOptions": {
+          "ApiGatewayMethodApiGetDashuserDashbyDashcardDashidCardidVarOptions": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "AuthorizationType": "NONE",
@@ -675,8 +501,7 @@
                   "ResponseParameters": {
                     "method.response.header.Access-Control-Allow-Origin": true,
                     "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
+                    "method.response.header.Access-Control-Allow-Methods": true
                   },
                   "ResponseModels": {}
                 }
@@ -687,161 +512,23 @@
                 "RequestTemplates": {
                   "application/json": "{statusCode:200}"
                 },
+                "ContentHandling": "CONVERT_TO_TEXT",
                 "IntegrationResponses": [
                   {
                     "StatusCode": "200",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'",
                       "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
                     },
                     "ResponseTemplates": {
-                      "application/json": ""
+                      "application/json": "#set($origin = $input.params(\"Origin\"))\n#if($origin == \"\") #set($origin = $input.params(\"origin\")) #end\n#if($origin.matches(\".+\")) #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin) #end"
                     }
                   }
                 ]
               },
               "ResourceId": {
-                "Ref": "ApiGatewayResourceMaskDashnumber"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              }
-            }
-          },
-          "ApiGatewayMethodHandleDashconversationsOptions": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "AuthorizationType": "NONE",
-              "HttpMethod": "OPTIONS",
-              "MethodResponses": [
-                {
-                  "StatusCode": "200",
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true,
-                    "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
-                  },
-                  "ResponseModels": {}
-                }
-              ],
-              "RequestParameters": {},
-              "Integration": {
-                "Type": "MOCK",
-                "RequestTemplates": {
-                  "application/json": "{statusCode:200}"
-                },
-                "IntegrationResponses": [
-                  {
-                    "StatusCode": "200",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'",
-                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
-                    },
-                    "ResponseTemplates": {
-                      "application/json": ""
-                    }
-                  }
-                ]
-              },
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceHandleDashconversations"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              }
-            }
-          },
-          "ApiGatewayMethodCountDashmessagesOptions": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "AuthorizationType": "NONE",
-              "HttpMethod": "OPTIONS",
-              "MethodResponses": [
-                {
-                  "StatusCode": "200",
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true,
-                    "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
-                  },
-                  "ResponseModels": {}
-                }
-              ],
-              "RequestParameters": {},
-              "Integration": {
-                "Type": "MOCK",
-                "RequestTemplates": {
-                  "application/json": "{statusCode:200}"
-                },
-                "IntegrationResponses": [
-                  {
-                    "StatusCode": "200",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'",
-                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
-                    },
-                    "ResponseTemplates": {
-                      "application/json": ""
-                    }
-                  }
-                ]
-              },
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceCountDashmessages"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              }
-            }
-          },
-          "ApiGatewayMethodUpdateDashuserOptions": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "AuthorizationType": "NONE",
-              "HttpMethod": "OPTIONS",
-              "MethodResponses": [
-                {
-                  "StatusCode": "200",
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true,
-                    "method.response.header.Access-Control-Allow-Headers": true,
-                    "method.response.header.Access-Control-Allow-Methods": true,
-                    "method.response.header.Access-Control-Allow-Credentials": true
-                  },
-                  "ResponseModels": {}
-                }
-              ],
-              "RequestParameters": {},
-              "Integration": {
-                "Type": "MOCK",
-                "RequestTemplates": {
-                  "application/json": "{statusCode:200}"
-                },
-                "IntegrationResponses": [
-                  {
-                    "StatusCode": "200",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'",
-                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
-                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,PUT'",
-                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
-                    },
-                    "ResponseTemplates": {
-                      "application/json": ""
-                    }
-                  }
-                ]
-              },
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceUpdateDashuser"
+                "Ref": "ApiGatewayResourceApiGetDashuserDashbyDashcardDashidCardidVar"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -889,8 +576,8 @@
                 },
                 "PassthroughBehavior": "NEVER",
                 "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  "
+                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  ",
+                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
                 },
                 "IntegrationResponses": [
                   {
@@ -959,7 +646,7 @@
                   },
                   {
                     "StatusCode": 504,
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)",
+                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'"
                     },
@@ -1075,8 +762,8 @@
                 },
                 "PassthroughBehavior": "NEVER",
                 "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  "
+                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  ",
+                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
                 },
                 "IntegrationResponses": [
                   {
@@ -1145,7 +832,7 @@
                   },
                   {
                     "StatusCode": 504,
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)",
+                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'"
                     },
@@ -1220,13 +907,13 @@
               ]
             }
           },
-          "ApiGatewayMethodIntializeDashconversationPost": {
+          "ApiGatewayMethodApiStartDashconversationPost": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "HttpMethod": "POST",
               "RequestParameters": {},
               "ResourceId": {
-                "Ref": "ApiGatewayResourceIntializeDashconversation"
+                "Ref": "ApiGatewayResourceApiStartDashconversation"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -1251,7 +938,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "InitializeConversationLambdaFunction",
+                          "StartConversationLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -1261,8 +948,8 @@
                 },
                 "PassthroughBehavior": "NEVER",
                 "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  "
+                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  ",
+                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
                 },
                 "IntegrationResponses": [
                   {
@@ -1331,7 +1018,7 @@
                   },
                   {
                     "StatusCode": 504,
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)",
+                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'"
                     },
@@ -1406,13 +1093,13 @@
               ]
             }
           },
-          "ApiGatewayMethodMaskDashnumberPost": {
+          "ApiGatewayMethodApiGetDashuserDashbyDashcardDashidCardidVarGet": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
-              "HttpMethod": "POST",
+              "HttpMethod": "GET",
               "RequestParameters": {},
               "ResourceId": {
-                "Ref": "ApiGatewayResourceMaskDashnumber"
+                "Ref": "ApiGatewayResourceApiGetDashuserDashbyDashcardDashidCardidVar"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
@@ -1437,7 +1124,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "MaskNumbersLambdaFunction",
+                          "GetUserByCardIdLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -1447,8 +1134,8 @@
                 },
                 "PassthroughBehavior": "NEVER",
                 "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  "
+                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  ",
+                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop,\n\n    \"requestPath\": \"$context.resourcePath\"\n  }\n\n  "
                 },
                 "IntegrationResponses": [
                   {
@@ -1517,7 +1204,7 @@
                   },
                   {
                     "StatusCode": 504,
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)",
+                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)",
                     "ResponseParameters": {
                       "method.response.header.Access-Control-Allow-Origin": "'*'"
                     },
@@ -1592,565 +1279,7 @@
               ]
             }
           },
-          "ApiGatewayMethodHandleDashconversationsPost": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "HttpMethod": "POST",
-              "RequestParameters": {},
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceHandleDashconversations"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
-              "Integration": {
-                "IntegrationHttpMethod": "POST",
-                "Type": "AWS",
-                "Uri": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":apigateway:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":lambda:path/2015-03-31/functions/",
-                      {
-                        "Fn::GetAtt": [
-                          "HandleConversationsLambdaFunction",
-                          "Arn"
-                        ]
-                      },
-                      "/invocations"
-                    ]
-                  ]
-                },
-                "PassthroughBehavior": "NEVER",
-                "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  "
-                },
-                "IntegrationResponses": [
-                  {
-                    "StatusCode": 200,
-                    "SelectionPattern": "",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 400,
-                    "SelectionPattern": "[\\s\\S]*\\[400\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 401,
-                    "SelectionPattern": "[\\s\\S]*\\[401\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 403,
-                    "SelectionPattern": "[\\s\\S]*\\[403\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 404,
-                    "SelectionPattern": "[\\s\\S]*\\[404\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 422,
-                    "SelectionPattern": "[\\s\\S]*\\[422\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 500,
-                    "SelectionPattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 502,
-                    "SelectionPattern": "[\\s\\S]*\\[502\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 504,
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  }
-                ]
-              },
-              "MethodResponses": [
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 200
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 400
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 401
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 403
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 404
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 422
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 500
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 502
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 504
-                }
-              ]
-            }
-          },
-          "ApiGatewayMethodCountDashmessagesPost": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "HttpMethod": "POST",
-              "RequestParameters": {},
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceCountDashmessages"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
-              "Integration": {
-                "IntegrationHttpMethod": "POST",
-                "Type": "AWS",
-                "Uri": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":apigateway:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":lambda:path/2015-03-31/functions/",
-                      {
-                        "Fn::GetAtt": [
-                          "CountMessagesLambdaFunction",
-                          "Arn"
-                        ]
-                      },
-                      "/invocations"
-                    ]
-                  ]
-                },
-                "PassthroughBehavior": "NEVER",
-                "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  "
-                },
-                "IntegrationResponses": [
-                  {
-                    "StatusCode": 200,
-                    "SelectionPattern": "",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 400,
-                    "SelectionPattern": "[\\s\\S]*\\[400\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 401,
-                    "SelectionPattern": "[\\s\\S]*\\[401\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 403,
-                    "SelectionPattern": "[\\s\\S]*\\[403\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 404,
-                    "SelectionPattern": "[\\s\\S]*\\[404\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 422,
-                    "SelectionPattern": "[\\s\\S]*\\[422\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 500,
-                    "SelectionPattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 502,
-                    "SelectionPattern": "[\\s\\S]*\\[502\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 504,
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  }
-                ]
-              },
-              "MethodResponses": [
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 200
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 400
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 401
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 403
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 404
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 422
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 500
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 502
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 504
-                }
-              ]
-            }
-          },
-          "ApiGatewayMethodUpdateDashuserPut": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-              "HttpMethod": "PUT",
-              "RequestParameters": {},
-              "ResourceId": {
-                "Ref": "ApiGatewayResourceUpdateDashuser"
-              },
-              "RestApiId": {
-                "Ref": "ApiGatewayRestApi"
-              },
-              "ApiKeyRequired": false,
-              "AuthorizationType": "NONE",
-              "Integration": {
-                "IntegrationHttpMethod": "POST",
-                "Type": "AWS",
-                "Uri": {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition"
-                      },
-                      ":apigateway:",
-                      {
-                        "Ref": "AWS::Region"
-                      },
-                      ":lambda:path/2015-03-31/functions/",
-                      {
-                        "Fn::GetAtt": [
-                          "ReturnFailMessageLambdaFunction",
-                          "Arn"
-                        ]
-                      },
-                      "/invocations"
-                    ]
-                  ]
-                },
-                "PassthroughBehavior": "NEVER",
-                "RequestTemplates": {
-                  "application/json": "\n    #set( $body = $input.json(\"$\") )\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  ",
-                  "application/x-www-form-urlencoded": "\n    #define( $body )\n      {\n      #foreach( $token in $input.path('$').split('&') )\n        #set( $keyVal = $token.split('=') )\n        #set( $keyValSize = $keyVal.size() )\n        #if( $keyValSize >= 1 )\n          #set( $key = $util.escapeJavaScript($util.urlDecode($keyVal[0])) )\n          #if( $keyValSize >= 2 )\n            #set($val = $util.escapeJavaScript($util.urlDecode($keyVal[1])).replaceAll(\"\\\\'\",\"'\"))\n          #else\n            #set( $val = '' )\n          #end\n          \"$key\": \"$val\"#if($foreach.hasNext),#end\n        #end\n      #end\n      }\n    #end\n\n    \n  #define( $loop )\n    {\n    #foreach($key in $map.keySet())\n        #set( $k = $util.escapeJavaScript($key) )\n        #set( $v = $util.escapeJavaScript($map.get($key)).replaceAll(\"\\\\'\", \"'\") )\n        \"$k\":\n          \"$v\"\n          #if( $foreach.hasNext ) , #end\n    #end\n    }\n  #end\n\n  {\n    \"body\": $body,\n    \"method\": \"$context.httpMethod\",\n    \"principalId\": \"$context.authorizer.principalId\",\n    \"stage\": \"$context.stage\",\n\n    \"cognitoPoolClaims\" : {\n       \n       \"sub\": \"$context.authorizer.claims.sub\"\n    },\n\n    #set( $map = $context.authorizer )\n    \"enhancedAuthContext\": $loop,\n\n    #set( $map = $input.params().header )\n    \"headers\": $loop,\n\n    #set( $map = $input.params().querystring )\n    \"query\": $loop,\n\n    #set( $map = $input.params().path )\n    \"path\": $loop,\n\n    #set( $map = $context.identity )\n    \"identity\": $loop,\n\n    #set( $map = $stageVariables )\n    \"stageVariables\": $loop\n  }\n\n  "
-                },
-                "IntegrationResponses": [
-                  {
-                    "StatusCode": 200,
-                    "SelectionPattern": "",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 400,
-                    "SelectionPattern": "[\\s\\S]*\\[400\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 401,
-                    "SelectionPattern": "[\\s\\S]*\\[401\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 403,
-                    "SelectionPattern": "[\\s\\S]*\\[403\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 404,
-                    "SelectionPattern": "[\\s\\S]*\\[404\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 422,
-                    "SelectionPattern": "[\\s\\S]*\\[422\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 500,
-                    "SelectionPattern": "[\\s\\S]*(Process\\s?exited\\s?before\\s?completing\\s?request|\\[500\\])[\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 502,
-                    "SelectionPattern": "[\\s\\S]*\\[502\\][\\s\\S]*",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  },
-                  {
-                    "StatusCode": 504,
-                    "SelectionPattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)",
-                    "ResponseParameters": {
-                      "method.response.header.Access-Control-Allow-Origin": "'*'"
-                    },
-                    "ResponseTemplates": {}
-                  }
-                ]
-              },
-              "MethodResponses": [
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 200
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 400
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 401
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 403
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 404
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 422
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 500
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 502
-                },
-                {
-                  "ResponseParameters": {
-                    "method.response.header.Access-Control-Allow-Origin": true
-                  },
-                  "ResponseModels": {},
-                  "StatusCode": 504
-                }
-              ]
-            }
-          },
-          "ApiGatewayDeployment1593465688432": {
+          "ApiGatewayDeployment1595866561531": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -2159,14 +1288,14 @@
               "StageName": "dev"
             },
             "DependsOn": [
+              "ApiGatewayMethodApiSendsmsOptions",
+              "ApiGatewayMethodApiReceivesmsOptions",
+              "ApiGatewayMethodApiStartDashconversationOptions",
+              "ApiGatewayMethodApiGetDashuserDashbyDashcardDashidCardidVarOptions",
               "ApiGatewayMethodApiSendsmsPost",
               "ApiGatewayMethodApiReceivesmsPost",
-              "ApiGatewayMethodIntializeDashconversationPost",
-              "ApiGatewayMethodMaskDashnumberPost",
-              "ApiGatewayMethodHandleDashconversationsPost",
-              "ApiGatewayMethodCountDashmessagesPost",
-              "ApiGatewayMethodUpdateDashuserPut",
-              "ApiGatewayMethodUpdateDashuserPut"
+              "ApiGatewayMethodApiStartDashconversationPost",
+              "ApiGatewayMethodApiGetDashuserDashbyDashcardDashidCardidVarGet"
             ]
           },
           "SendSmsLambdaPermissionApiGateway": {
@@ -2179,17 +1308,7 @@
                 ]
               },
               "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
+              "Principal": "apigateway.amazonaws.com",
               "SourceArn": {
                 "Fn::Join": [
                   "",
@@ -2226,17 +1345,7 @@
                 ]
               },
               "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
+              "Principal": "apigateway.amazonaws.com",
               "SourceArn": {
                 "Fn::Join": [
                   "",
@@ -2263,27 +1372,17 @@
               }
             }
           },
-          "InitializeConversationLambdaPermissionApiGateway": {
+          "StartConversationLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "InitializeConversationLambdaFunction",
+                  "StartConversationLambdaFunction",
                   "Arn"
                 ]
               },
               "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
+              "Principal": "apigateway.amazonaws.com",
               "SourceArn": {
                 "Fn::Join": [
                   "",
@@ -2310,27 +1409,17 @@
               }
             }
           },
-          "MaskNumbersLambdaPermissionApiGateway": {
+          "GetUserByCardIdLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "MaskNumbersLambdaFunction",
+                  "GetUserByCardIdLambdaFunction",
                   "Arn"
                 ]
               },
               "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
+              "Principal": "apigateway.amazonaws.com",
               "SourceArn": {
                 "Fn::Join": [
                   "",
@@ -2357,201 +1446,21 @@
               }
             }
           },
-          "HandleConversationsLambdaPermissionApiGateway": {
-            "Type": "AWS::Lambda::Permission",
-            "Properties": {
-              "FunctionName": {
-                "Fn::GetAtt": [
-                  "HandleConversationsLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
-              "SourceArn": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":execute-api:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":",
-                    {
-                      "Ref": "ApiGatewayRestApi"
-                    },
-                    "/*/*"
-                  ]
-                ]
-              }
-            }
-          },
-          "CountMessagesLambdaPermissionApiGateway": {
-            "Type": "AWS::Lambda::Permission",
-            "Properties": {
-              "FunctionName": {
-                "Fn::GetAtt": [
-                  "CountMessagesLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
-              "SourceArn": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":execute-api:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":",
-                    {
-                      "Ref": "ApiGatewayRestApi"
-                    },
-                    "/*/*"
-                  ]
-                ]
-              }
-            }
-          },
-          "UpdateUsersLambdaPermissionApiGateway": {
-            "Type": "AWS::Lambda::Permission",
-            "Properties": {
-              "FunctionName": {
-                "Fn::GetAtt": [
-                  "UpdateUsersLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
-              "SourceArn": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":execute-api:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":",
-                    {
-                      "Ref": "ApiGatewayRestApi"
-                    },
-                    "/*/*"
-                  ]
-                ]
-              }
-            }
-          },
-          "ReturnFailMessageLambdaPermissionApiGateway": {
-            "Type": "AWS::Lambda::Permission",
-            "Properties": {
-              "FunctionName": {
-                "Fn::GetAtt": [
-                  "ReturnFailMessageLambdaFunction",
-                  "Arn"
-                ]
-              },
-              "Action": "lambda:InvokeFunction",
-              "Principal": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "apigateway.",
-                    {
-                      "Ref": "AWS::URLSuffix"
-                    }
-                  ]
-                ]
-              },
-              "SourceArn": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":execute-api:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId"
-                    },
-                    ":",
-                    {
-                      "Ref": "ApiGatewayRestApi"
-                    },
-                    "/*/*"
-                  ]
-                ]
-              }
-            }
-          },
-          "MyDynamoDbTable": {
+          "UserTable": {
             "Type": "AWS::DynamoDB::Table",
             "Properties": {
-              "TableName": "conversation",
+              "TableName": "user",
               "AttributeDefinitions": [
                 {
                   "AttributeName": "ID",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "card_id",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "phone_number",
                   "AttributeType": "S"
                 }
               ],
@@ -2559,6 +1468,85 @@
                 {
                   "AttributeName": "ID",
                   "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "cardIdIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "card_id",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "PhoneNumberIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "phone_number",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          },
+          "ConversationTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "conversation",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "ID",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "user_phone",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "light_phone",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "ID",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "LightPhoneIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "light_phone",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                },
+                {
+                  "IndexName": "UserPhoneIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "user_phone",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
                 }
               ],
               "BillingMode": "PAY_PER_REQUEST"
@@ -2574,49 +1562,25 @@
           "SendSmsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "SendSmsLambdaVersionqJ8v1ItHhwpMqgToMmmPUt07uTsIol6URbvKYstw"
+              "Ref": "SendSmsLambdaVersionL9TdjNMOgYfK52iMZHq9hMhoSIrdwFcDbkSRr2NnZI"
             }
           },
           "ReceiveSmsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ReceiveSmsLambdaVersioncL2ZIzQgURYimjNmXxbRy29jLUB6BKw7rvqdBgL98"
+              "Ref": "ReceiveSmsLambdaVersionqPvtYcVUpIlHRjH6ueTjHCjXPP1O1lkYagksSYkaogE"
             }
           },
-          "InitializeConversationLambdaFunctionQualifiedArn": {
+          "StartConversationLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "InitializeConversationLambdaVersionm9Ki0mmsdMViW4QMNWfGfHW5B2vk5ZDMHku1EJkqJ9s"
+              "Ref": "StartConversationLambdaVersion1eGAUEv5oWVT5Ufb8sSVdBtOG0VJ4NzzosksIw76g"
             }
           },
-          "MaskNumbersLambdaFunctionQualifiedArn": {
+          "GetUserByCardIdLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MaskNumbersLambdaVersion9BWGCEs2ba5AvQ9iZwaPDpgGCS2Kc3AOnR5FgaiI"
-            }
-          },
-          "HandleConversationsLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "HandleConversationsLambdaVersionTUX7CF2QKrHrON8meJvwB9kOQjUs7wBzGNdEGA61gno"
-            }
-          },
-          "CountMessagesLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "CountMessagesLambdaVersiontOvimDC0MW16XAhJoOB7ZZliAuMMjOzMySAuc1VJjO0"
-            }
-          },
-          "UpdateUsersLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "UpdateUsersLambdaVersionZiCoNXwoELmJ6xJmqtSnjeG2lWGuPrtPBhBeJjf8LY"
-            }
-          },
-          "ReturnFailMessageLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "ReturnFailMessageLambdaVersionIOReXrrynWlxtjpVuUqWZxdi2u2AkVGOGw7rotO4"
+              "Ref": "GetUserByCardIdLambdaVersionkdxQILDL14XgVWCJmqKxqcWghTmHkxnyWagXfddHYE"
             }
           },
           "ServiceEndpoint": {
@@ -2629,7 +1593,11 @@
                   {
                     "Ref": "ApiGatewayRestApi"
                   },
-                  ".execute-api.us-east-2.",
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
                   {
                     "Ref": "AWS::URLSuffix"
                   },
@@ -2645,7 +1613,58 @@
         "Description": "The AWS CloudFormation template for this Serverless application",
         "Resources": {
           "ServerlessDeploymentBucket": {
-            "Type": "AWS::S3::Bucket"
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
           }
         },
         "Outputs": {
@@ -2658,12 +1677,10 @@
       },
       "vpc": {}
     },
-    "custom": {
-      "tableName": "conversation"
-    },
     "plugins": [
       "serverless-dotenv-plugin"
     ],
+    "pluginsData": {},
     "functions": {
       "SendSms": {
         "handler": "handler.sendSms",
@@ -2722,7 +1739,7 @@
                     "pattern": "[\\s\\S]*\\[502\\][\\s\\S]*"
                   },
                   "504": {
-                    "pattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(^[Task timed out].*)"
+                    "pattern": "([\\s\\S]*\\[504\\][\\s\\S]*)|(.*Task timed out after \\d+\\.\\d+ seconds$)"
                   }
                 }
               }
@@ -2731,10 +1748,14 @@
         ],
         "name": "twilio-lambda-functions-dev-SendSms",
         "package": {},
-        "vpc": {}
+        "memory": 256,
+        "timeout": 10,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "SendSmsLambdaVersionL9TdjNMOgYfK52iMZHq9hMhoSIrdwFcDbkSRr2NnZI"
       },
       "ReceiveSms": {
-        "handler": "lambda-endpoints/receive_webhook.receiveSms",
+        "handler": "lambda-endpoints/receive_webhook.handler",
         "events": [
           {
             "http": {
@@ -2773,14 +1794,18 @@
         ],
         "name": "twilio-lambda-functions-dev-ReceiveSms",
         "package": {},
-        "vpc": {}
+        "memory": 256,
+        "timeout": 10,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "ReceiveSmsLambdaVersionqPvtYcVUpIlHRjH6ueTjHCjXPP1O1lkYagksSYkaogE"
       },
-      "initializeConversation": {
-        "handler": "lambda-endpoints/initializeConversation.handler",
+      "StartConversation": {
+        "handler": "lambda-endpoints/startConversation.handler",
         "events": [
           {
             "http": {
-              "path": "intialize-conversation",
+              "path": "api/start-conversation",
               "method": "post",
               "integration": "AWS",
               "cors": {
@@ -2813,17 +1838,21 @@
             }
           }
         ],
-        "name": "twilio-lambda-functions-dev-initializeConversation",
+        "name": "twilio-lambda-functions-dev-StartConversation",
         "package": {},
-        "vpc": {}
+        "memory": 256,
+        "timeout": 10,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "StartConversationLambdaVersion1eGAUEv5oWVT5Ufb8sSVdBtOG0VJ4NzzosksIw76g"
       },
-      "maskNumbers": {
-        "handler": "lambda-endpoints/maskNumber.handler",
+      "GetUserByCardId": {
+        "handler": "lambda-endpoints/getUserByCardId.handler",
         "events": [
           {
             "http": {
-              "path": "mask-number",
-              "method": "post",
+              "path": "api/get-user-by-card-id/{card_Id}",
+              "method": "get",
               "integration": "AWS",
               "cors": {
                 "origins": [
@@ -2832,7 +1861,7 @@
                 "origin": "*",
                 "methods": [
                   "OPTIONS",
-                  "POST"
+                  "GET"
                 ],
                 "headers": [
                   "Content-Type",
@@ -2855,188 +1884,32 @@
             }
           }
         ],
-        "name": "twilio-lambda-functions-dev-maskNumbers",
+        "name": "twilio-lambda-functions-dev-GetUserByCardId",
         "package": {},
-        "vpc": {}
-      },
-      "handleConversations": {
-        "handler": "lambda-endpoints/handleConversations.handler",
-        "events": [
-          {
-            "http": {
-              "path": "handle-conversations",
-              "method": "post",
-              "integration": "AWS",
-              "cors": {
-                "origins": [
-                  "*"
-                ],
-                "origin": "*",
-                "methods": [
-                  "OPTIONS",
-                  "POST"
-                ],
-                "headers": [
-                  "Content-Type",
-                  "X-Amz-Date",
-                  "Authorization",
-                  "X-Api-Key",
-                  "X-Amz-Security-Token",
-                  "X-Amz-User-Agent"
-                ],
-                "allowCredentials": false
-              },
-              "request": {
-                "passThrough": "NEVER"
-              },
-              "response": {
-                "statusCodes": {
-                  "$ref": "$[\"service\"][\"functions\"][\"SendSms\"][\"events\"][0][\"http\"][\"response\"][\"statusCodes\"]"
-                }
-              }
-            }
-          }
-        ],
-        "name": "twilio-lambda-functions-dev-handleConversations",
-        "package": {},
-        "vpc": {}
-      },
-      "countMessages": {
-        "handler": "lambda-endpoints/countMessages.handler",
-        "events": [
-          {
-            "http": {
-              "path": "count-messages",
-              "method": "post",
-              "integration": "AWS",
-              "cors": {
-                "origins": [
-                  "*"
-                ],
-                "origin": "*",
-                "methods": [
-                  "OPTIONS",
-                  "POST"
-                ],
-                "headers": [
-                  "Content-Type",
-                  "X-Amz-Date",
-                  "Authorization",
-                  "X-Api-Key",
-                  "X-Amz-Security-Token",
-                  "X-Amz-User-Agent"
-                ],
-                "allowCredentials": false
-              },
-              "request": {
-                "passThrough": "NEVER"
-              },
-              "response": {
-                "statusCodes": {
-                  "$ref": "$[\"service\"][\"functions\"][\"SendSms\"][\"events\"][0][\"http\"][\"response\"][\"statusCodes\"]"
-                }
-              }
-            }
-          }
-        ],
-        "name": "twilio-lambda-functions-dev-countMessages",
-        "package": {},
-        "vpc": {}
-      },
-      "updateUsers": {
-        "handler": "lambda-endpoints/updateUsers.handler",
-        "events": [
-          {
-            "http": {
-              "path": "update-user",
-              "method": "put",
-              "integration": "AWS",
-              "cors": {
-                "origins": [
-                  "*"
-                ],
-                "origin": "*",
-                "methods": [
-                  "OPTIONS",
-                  "PUT"
-                ],
-                "headers": [
-                  "Content-Type",
-                  "X-Amz-Date",
-                  "Authorization",
-                  "X-Api-Key",
-                  "X-Amz-Security-Token",
-                  "X-Amz-User-Agent"
-                ],
-                "allowCredentials": false
-              },
-              "request": {
-                "passThrough": "NEVER"
-              },
-              "response": {
-                "statusCodes": {
-                  "$ref": "$[\"service\"][\"functions\"][\"SendSms\"][\"events\"][0][\"http\"][\"response\"][\"statusCodes\"]"
-                }
-              }
-            }
-          }
-        ],
-        "name": "twilio-lambda-functions-dev-updateUsers",
-        "package": {},
-        "vpc": {}
-      },
-      "returnFailMessage": {
-        "handler": "lambda-endpoints/returnFailMessage.handler",
-        "events": [
-          {
-            "http": {
-              "path": "update-user",
-              "method": "put",
-              "integration": "AWS",
-              "cors": {
-                "origins": [
-                  "*"
-                ],
-                "origin": "*",
-                "methods": [
-                  "OPTIONS",
-                  "PUT"
-                ],
-                "headers": [
-                  "Content-Type",
-                  "X-Amz-Date",
-                  "Authorization",
-                  "X-Api-Key",
-                  "X-Amz-Security-Token",
-                  "X-Amz-User-Agent"
-                ],
-                "allowCredentials": false
-              },
-              "request": {
-                "passThrough": "NEVER"
-              },
-              "response": {
-                "statusCodes": {
-                  "$ref": "$[\"service\"][\"functions\"][\"SendSms\"][\"events\"][0][\"http\"][\"response\"][\"statusCodes\"]"
-                }
-              }
-            }
-          }
-        ],
-        "name": "twilio-lambda-functions-dev-returnFailMessage",
-        "package": {},
-        "vpc": {}
+        "memory": 256,
+        "timeout": 10,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "GetUserByCardIdLambdaVersionkdxQILDL14XgVWCJmqKxqcWghTmHkxnyWagXfddHYE"
       }
     },
     "resources": {
       "Resources": {
-        "MyDynamoDbTable": {
+        "UserTable": {
           "Type": "AWS::DynamoDB::Table",
           "Properties": {
-            "TableName": "conversation",
+            "TableName": "user",
             "AttributeDefinitions": [
               {
                 "AttributeName": "ID",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "card_id",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "phone_number",
                 "AttributeType": "S"
               }
             ],
@@ -3046,16 +1919,98 @@
                 "KeyType": "HASH"
               }
             ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "cardIdIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "card_id",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "PhoneNumberIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "phone_number",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        },
+        "ConversationTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "conversation",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "ID",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "user_phone",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "light_phone",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "ID",
+                "KeyType": "HASH"
+              }
+            ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "LightPhoneIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "light_phone",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              },
+              {
+                "IndexName": "UserPhoneIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "user_phone",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ],
             "BillingMode": "PAY_PER_REQUEST"
           }
         }
       },
       "Outputs": {}
     },
-    "artifact": "C:\\Users\\user\\Google Drive\\my-repo\\dave kley\\dat.cards\\card-date-app\\backend\\twilio-serverless\\.serverless\\twilio-lambda-functions.zip"
+    "serviceFilename": "serverless.yml",
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false,
+    "artifact": "C:\\Users\\brand\\my-repo\\twilio-serverless\\.serverless\\twilio-lambda-functions.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/twilio-lambda-functions/dev/1593465681274-2020-06-29T21:21:21.274Z",
+    "artifactDirectoryName": "serverless/twilio-lambda-functions/dev/1595866576035-2020-07-27T16:16:16.035Z",
     "artifact": "twilio-lambda-functions.zip"
   }
 }
